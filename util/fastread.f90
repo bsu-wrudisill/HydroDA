@@ -1,18 +1,18 @@
 module test
 contains
-subroutine readnc(FILE_NAME, featureid, n, outputfile)
+subroutine readnc(file_name, x, y, outputfile)
   use netcdf
   implicit none 
-  character (len = *) :: FILE_NAME
+  character (len = *) :: file_name
   character (len = *) :: outputfile
-  character (len = *), parameter :: varname = "streamflow"
-  integer :: featureid, n, ncid, varid, status
-  real :: data(n), output(1)
+  character (len = *), parameter :: varname = "RAINNC"
+  integer :: featureid, x, y, lat, lon, ncid, varid, status
+  real :: data(x,y), output(x,y)
   
   !f2py intent(out) output
   
   ! open the file 
-  status = nf90_open(FILE_NAME, NF90_NOWRITE, ncid)
+  status = nf90_open(file_name, NF90_NOWRITE, ncid)
   
   !! get the variable 
   status = nf90_inq_varid(ncid, varname, varid)
@@ -21,14 +21,18 @@ subroutine readnc(FILE_NAME, featureid, n, outputfile)
   status = nf90_get_var(ncid, varid, data)
   
   !! now we can access the data ... i think
-  output = data(featureid)
+  output = data(x,y)
  
+  do lat = 1, x
+        do lon =1, y
+                print *, data(lat,lon)
+        end do
+  end do 
   
-  
-  ! write the data to a text file 
-  open (10, file=outputfile, status='unknown', position='append')
-  write(10, *) FILE_NAME, ',', output
-  close(10)
+  !  ! write the data to a text file 
+  !open (10, file=outputfile, status='unknown', position='append')
+  !write(10, *) FILE_NAME, ',', output
+  !close(10)
   
   ! close the netcdf file  
   status = nf90_close(ncid)
